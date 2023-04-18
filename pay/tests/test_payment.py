@@ -1,13 +1,13 @@
 from pay.payment import pay_order
 from pay.order import LineItem, Order
-from pytest import MonkeyPatch, raises
+from pytest import raises
 from pay.credit_card import CreditCard
 import pytest
 from datetime import date
 
 class PaymentProcessorMock:
-    def charge(self, card: str, month: int, year: int, amount: int) -> None:
-        print(f"Charging card number {card} for ${amount/100:.2f}")
+    def charge(self, card: CreditCard, amount: int) -> None:
+        print(f"Charging card number {card.number} for ${amount/100:.2f}")
 
 @pytest.fixture
 def card() -> CreditCard:
