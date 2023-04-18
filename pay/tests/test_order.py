@@ -12,7 +12,12 @@ def test_order_total_single_item():
     
 def test_order_total():
     order = Order()
-    order.line_items.append(LineItem(name="Item1", price=100_00, quantity=2))
-    order.line_items.append(LineItem(name="Item2", price=50_00))
-    assert order.total == 250_00
+    order.line_items.append(LineItem(name="Item1", price=100, quantity=2))
+    order.line_items.append(LineItem(name="Item2", price=50))
+    assert order.total == 250
+    
+def test_order_pay():
+    order = Order()
+    order.pay()
+    assert order.status == OrderStatus.PAID
     
