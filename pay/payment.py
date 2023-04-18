@@ -1,6 +1,7 @@
 from pay.order import Order
 from pay.processor import PaymentProcessor
 
+
 def pay_order(order: Order):
     if order.total == 0:
         raise ValueError("Can't pay an order with total 0.")
