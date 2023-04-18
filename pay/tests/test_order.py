@@ -16,6 +16,13 @@ def test_order_total():
     order.line_items.append(LineItem(name="Item2", price=50))
     assert order.total == 250
     
+def test_order_total_multiple_items():
+    order = Order()
+    order.line_items.append(LineItem(name="Item1", price=100, quantity=2))
+    order.line_items.append(LineItem(name="Item2", price=50))
+    order.line_items.append(LineItem(name="Item3", price=25, quantity=3))
+    assert order.total == 325
+
 def test_order_pay():
     order = Order()
     order.pay()

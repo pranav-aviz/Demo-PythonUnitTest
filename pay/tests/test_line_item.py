@@ -15,6 +15,3 @@ def test_line_item_type():
 def test_line_item_name():
     item = LineItem(name="Test", price=100)
     assert item.name == "Test"
-
-# how to create html for this test
-# a: pytest --html=report.html

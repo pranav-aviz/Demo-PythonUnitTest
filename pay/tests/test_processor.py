@@ -1,43 +1,53 @@
 import pytest
-from pay.processor import PaymentProcessor
+import os
+from datetime import date
+from pay.processor import PaymentProcessor, luhn_checksum
+from pay.credit_card import CreditCard
+from datetime import date
+from dotenv import load_dotenv
 
-API_KEY = "6cfb67f3-6281-4031-b893-ea85db0dce20"
-VALID_CARD = "4242424242424242"
+load_dotenv()
+FUTURE_YEAR = date.today().year + 1
+API_KEY = os.getenv("API_KEY") or "" 
+VALID_CARD_NUMBER = "4242424242424242"
+# reminder : valid card number will be any even number
 
-def test_valid_api_key():
-    processor = PaymentProcessor(API_KEY)
-    assert processor._check_api_key()
+@pytest.fixture
+def card() -> CreditCard:
+    future_year = date.today().year + 1
+    return CreditCard(VALID_CARD_NUMBER, 12, future_year)
 
-def test_api_key():
-    processor = PaymentProcessor(API_KEY)
-    assert processor.api_key == API_KEY
+@pytest.fixture
+def payment_processor() -> PaymentProcessor:
+    return PaymentProcessor(API_KEY)
 
-def test_empty_api_key():
-    processor = PaymentProcessor("")
-    assert not processor._check_api_key() 
-    
-def  test_card_valid_date():
-    processor = PaymentProcessor(API_KEY)
-    assert processor.validate_card(VALID_CARD, 12, 2023)
-    
-def test_card_invalid_date():
+def test_valid_api_key(payment_processor:PaymentProcessor):
+    assert payment_processor._check_api_key()
+
+def test_api_key(payment_processor:PaymentProcessor):
+    assert payment_processor.api_key == API_KEY
+
+def test_empty_api_key(card:CreditCard):
     with pytest.raises(ValueError):
-        processor = PaymentProcessor(API_KEY)
-        processor.charge(VALID_CARD, 12, 2019,100)
+        payment_processor = PaymentProcessor("")
+        payment_processor.charge(card, 100)
+    
+def  test_card_valid_date(card:CreditCard,payment_processor:PaymentProcessor):
+    assert payment_processor.validate_card(card)
+    
+def test_card_invalid_date(payment_processor:PaymentProcessor):
+    with pytest.raises(ValueError):
+        payment_processor.charge(CreditCard(VALID_CARD_NUMBER,12,2000), 100)
 
 def test_valid_checksum():
-    processor = PaymentProcessor(API_KEY)
-    assert processor.luhn_checksum(VALID_CARD)
+    assert luhn_checksum(VALID_CARD_NUMBER)
 
 def test_invalid_checksum():
-    processor = PaymentProcessor(API_KEY)
-    assert not processor.luhn_checksum("12345")
+    assert not luhn_checksum("4242424242424243")
     
-def test_charge():
-    processor = PaymentProcessor(API_KEY)
-    processor.charge(VALID_CARD, 12, 2023, 100)
+def test_charge(card:CreditCard,payment_processor:PaymentProcessor):
+    payment_processor.charge(card, 100)
 
-def test_invalid_card():
+def test_invalid_card_NUMBER(payment_processor:PaymentProcessor):
     with pytest.raises(ValueError):
-        processor = PaymentProcessor(API_KEY)
-        processor.charge("12345", 12, 2023, 100)
+        payment_processor.charge(CreditCard("4242424242424243",12,FUTURE_YEAR), 100)
